@@ -8,11 +8,25 @@ import { Observable, tap } from 'rxjs';
 })
 export class LoginService {
 
-  private apiUrl = 'http://localhost:8080';
+  apiUrl: string = "http://localhost:8080/auth"
 
-  constructor(private httpClient: HttpClient) { } 
+  constructor(private httpClient: HttpClient) { }
 
-  login(username: string, password: string): Observable<any> {
-    return this.httpClient.post<any>(`${this.apiUrl}/login`, { username, password });
+  login(email: string, password: string){
+    return this.httpClient.post<LoginResponse>(this.apiUrl + "/login", { email, password }).pipe(
+      tap((value) => {
+        sessionStorage.setItem("auth-token", value.token)
+        sessionStorage.setItem("username", value.name)
+      })
+    )
+  }
+
+  signup(name: string, email: string, password: string){
+    return this.httpClient.post<LoginResponse>(this.apiUrl + "/register", { name, email, password }).pipe(
+      tap((value) => {
+        sessionStorage.setItem("auth-token", value.token)
+        sessionStorage.setItem("username", value.name)
+      })
+    )
   }
 }
