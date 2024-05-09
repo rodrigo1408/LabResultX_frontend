@@ -10,23 +10,24 @@ export class LoginService {
 
   apiUrl: string = "http://localhost:8080/auth"
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private http: HttpClient) { }
 
-  login(email: string, password: string){
-    return this.httpClient.post<LoginResponse>(this.apiUrl + "/login", { email, password }).pipe(
-      tap((value) => {
-        sessionStorage.setItem("auth-token", value.token)
-        sessionStorage.setItem("username", value.name)
+  login(credentials: { email: string, password: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
+      tap((response: any) => {
+        // Salvar token JWT no armazenamento local após o login bem-sucedido
+        localStorage.setItem('token', response.token);
       })
-    )
+    );
   }
 
-  signup(name: string, email: string, password: string){
-    return this.httpClient.post<LoginResponse>(this.apiUrl + "/register", { name, email, password }).pipe(
-      tap((value) => {
-        sessionStorage.setItem("auth-token", value.token)
-        sessionStorage.setItem("username", value.name)
-      })
-    )
+  logout(): void {
+    // Remover token JWT do armazenamento local após o logout
+    localStorage.removeItem('token');
+  }
+
+  isAuthenticated(): boolean {
+    // Verificar se o token JWT está presente no armazenamento local para determinar se o usuário está autenticado
+    return !!localStorage.getItem('token');
   }
 }
